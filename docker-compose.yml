@@ -1,0 +1,8 @@
+services:
+  mailcow-ui:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    # Only listen locally; put it behind your reverse proxy with HTTPS.
+    ports:
+      - "127.0.0.1:3000:3000"
