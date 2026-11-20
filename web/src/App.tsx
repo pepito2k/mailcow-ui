@@ -17,7 +17,6 @@ import { SystemPage } from "./pages/System";
 import { AppPasswordsPage } from "./pages/AppPasswords";
 import { Fail2banPage } from "./pages/Fail2ban";
 import { SpamFilterPage } from "./pages/SpamFilter";
-import { SharedMailboxesPage } from "./pages/SharedMailboxes";
 import { ResourcePage } from "./components/ResourcePage";
 import * as defs from "./resources";
 
@@ -79,7 +78,6 @@ export function App() {
           <Route path="app-passwords" element={<AppPasswordsPage />} />
           <Route path="fail2ban" element={<Fail2banPage />} />
           <Route path="spam-filter" element={<SpamFilterPage />} />
-          <Route path="shared-mailboxes" element={<SharedMailboxesPage mailcowUrl={state.mailcowUrl} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

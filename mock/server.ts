@@ -322,7 +322,6 @@ app.post("/api/v1/edit/mailbox", (req, res) => {
       r.percent_in_use = Math.round((Number(r.quota_used) / Number(r.quota)) * 100);
     }
     if (a.force_pw_update !== undefined) (r.attributes as Row).force_pw_update = String(a.force_pw_update);
-    if (a.sender_acl !== undefined) r.sender_acl_saved = a.sender_acl;
   });
   res.json(ok(["mailbox_modified", items.join(", ")]));
 });

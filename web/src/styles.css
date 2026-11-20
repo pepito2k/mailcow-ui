@@ -1488,53 +1488,6 @@ textarea.input {
   margin: 8px 0 0;
 }
 
-/* ---------- shared mailboxes ---------- */
-.steps-intro {
-  margin: -8px 0 16px;
-  max-width: 760px;
-  line-height: 1.5;
-}
-.grid-top {
-  align-items: start;
-}
-.form-grid.one-col {
-  grid-template-columns: 1fr;
-}
-.chips-gap {
-  margin: 4px 0 8px;
-}
-.chip-x {
-  border: 0;
-  background: none;
-  color: inherit;
-  padding: 0 0 0 2px;
-  cursor: pointer;
-  display: inline-flex;
-}
-.steps {
-  margin: 8px 0 12px;
-  padding-left: 20px;
-  display: grid;
-  gap: 6px;
-  line-height: 1.45;
-}
-.details summary {
-  cursor: pointer;
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-.details {
-  margin-bottom: 12px;
-}
-.code-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-}
-.inline-icon {
-  vertical-align: -2px;
-}
-
 /* DNS records table: stack rows on phones so long values stay readable */
 @media (max-width: 640px) {
   .table-dns thead {
