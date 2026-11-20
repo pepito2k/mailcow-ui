@@ -5,6 +5,7 @@
  */
 import express from "express";
 import { randomUUID } from "node:crypto";
+import { registerExtra } from "./extra";
 
 const MiB = 1024 * 1024;
 const GiB = 1024 * MiB;
@@ -358,6 +359,8 @@ app.post("/api/v1/delete/qitem", (req, res) => {
   removeWhere(quarantine, (q) => items.map(String).includes(String(q.id)));
   res.json(ok("item_deleted"));
 });
+
+registerExtra(app);
 
 app.use((req, res) => res.status(404).json({ type: "error", msg: `mock: route not found ${req.method} ${req.path}` }));
 

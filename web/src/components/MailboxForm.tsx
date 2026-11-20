@@ -3,7 +3,9 @@ import { Dices, Eye, EyeOff } from "lucide-react";
 import type { Domain, Mailbox } from "../lib/api";
 import { bytes, isActive, toMiB } from "../lib/format";
 import { useDomains, useMailcowMutation } from "../lib/queries";
+import { Link } from "react-router";
 import { Button, Field, Modal, TextInput, Toggle } from "./ui";
+import { RateLimitSection } from "./RateLimit";
 
 export function generatePassword(len = 20) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789-_.!";
@@ -202,6 +204,16 @@ function Body({ onClose, mailbox, defaultDomain }: { onClose: () => void; mailbo
           </>
         )}
       </div>
+      {editing && (
+        <>
+          <RateLimitSection kind="mbox" id={mailbox!.username} />
+          <p className="muted small">
+            <Link className="link" to={`/app-passwords?mailbox=${encodeURIComponent(mailbox!.username)}`} onClick={onClose}>
+              Manage app passwords for this mailbox
+            </Link>
+          </p>
+        </>
+      )}
       <div className="modal-foot modal-foot-inline">
         <Button variant="ghost" type="button" onClick={onClose}>
           Cancel

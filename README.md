@@ -2,7 +2,7 @@
 
 A cleaner admin UI for a self-hosted [mailcow](https://mailcow.email) server. It talks to mailcow's REST API (`/api/v1`) and doesn't change mailcow itself, so you can run it next to the built-in UI and remove it any time.
 
-**Screens:** dashboard, domains (with per-domain mailboxes, aliases, DKIM and recommended DNS records), mailboxes (search, filters, bulk enable/disable/delete), aliases (including catch-all), mail queue, quarantine, logs and service status. Light and dark themes, works on a phone.
+**Screens:** dashboard, domains (with per-domain mailboxes, aliases, DKIM, DNS records and rate limits), mailboxes (search, filters, bulk actions, rate limits), aliases, alias domains, resources, mail queue, quarantine, sync jobs, transports, relay hosts, TLS policies, BCC maps, recipient maps, forwarding hosts, domain admins, app passwords, Fail2ban, logs and service status. Light and dark themes, works on a phone.
 
 ## How it works
 
@@ -65,6 +65,6 @@ web/      React + TypeScript frontend (Vite, TanStack Query, React Router)
 mock/     Fake mailcow API for development
 ```
 
-## Not built yet
+## Still only in mailcow's own UI
 
-Domain admins, app passwords, sync jobs, resources, transports and relay hosts, rate limits, Fail2ban settings, rspamd settings, TLS policy maps and the BCC maps are still only in mailcow's own UI.
+rspamd settings and spam filter maps, OAuth2 clients, per-mailbox spam score and allow/block lists, quotas notifications, and the mailcow system configuration pages. Screens that use API calls I couldn't verify against a real server: quarantine release, emptying the whole queue, Fail2ban unban and resource booking options.

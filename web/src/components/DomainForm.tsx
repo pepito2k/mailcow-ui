@@ -4,6 +4,7 @@ import { mcPost } from "../lib/api";
 import { isActive, toMiB } from "../lib/format";
 import { useMailcowMutation } from "../lib/queries";
 import { Button, Field, Modal, TextInput, Toggle } from "./ui";
+import { RateLimitSection } from "./RateLimit";
 
 interface Values {
   domain: string;
@@ -113,6 +114,7 @@ function DomainFormBody({ onClose, domain }: { onClose: () => void; domain?: Dom
         <Toggle checked={v.relay_all_recipients} onChange={(x) => set("relay_all_recipients", x)} label="Relay all recipients" />
         {!editing && <Toggle checked={v.dkim} onChange={(x) => set("dkim", x)} label="Create a DKIM key (2048-bit)" />}
       </div>
+      {editing && <RateLimitSection kind="domain" id={domain!.domain_name} />}
       <div className="modal-foot modal-foot-inline">
         <Button variant="ghost" type="button" onClick={onClose}>
           Cancel

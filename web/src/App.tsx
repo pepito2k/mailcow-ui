@@ -14,6 +14,10 @@ import { QueuePage } from "./pages/Queue";
 import { QuarantinePage } from "./pages/Quarantine";
 import { LogsPage } from "./pages/Logs";
 import { SystemPage } from "./pages/System";
+import { AppPasswordsPage } from "./pages/AppPasswords";
+import { Fail2banPage } from "./pages/Fail2ban";
+import { ResourcePage } from "./components/ResourcePage";
+import * as defs from "./resources";
 
 type AuthState = { status: "loading" } | { status: "out" } | { status: "in"; user: string; mailcowUrl: string };
 
@@ -60,6 +64,18 @@ export function App() {
           <Route path="quarantine" element={<QuarantinePage />} />
           <Route path="logs" element={<LogsPage />} />
           <Route path="system" element={<SystemPage />} />
+          <Route path="alias-domains" element={<ResourcePage key="ad" def={defs.aliasDomains} />} />
+          <Route path="resources" element={<ResourcePage key="res" def={defs.resources} />} />
+          <Route path="domain-admins" element={<ResourcePage key="da" def={defs.domainAdmins} />} />
+          <Route path="sync-jobs" element={<ResourcePage key="sj" def={defs.syncJobs} />} />
+          <Route path="transports" element={<ResourcePage key="tr" def={defs.transports} />} />
+          <Route path="relay-hosts" element={<ResourcePage key="rh" def={defs.relayHosts} />} />
+          <Route path="tls-policies" element={<ResourcePage key="tls" def={defs.tlsPolicies} />} />
+          <Route path="bcc-maps" element={<ResourcePage key="bcc" def={defs.bccMaps} />} />
+          <Route path="recipient-maps" element={<ResourcePage key="rm" def={defs.recipientMaps} />} />
+          <Route path="forwarding-hosts" element={<ResourcePage key="fh" def={defs.forwardingHosts} />} />
+          <Route path="app-passwords" element={<AppPasswordsPage />} />
+          <Route path="fail2ban" element={<Fail2banPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
