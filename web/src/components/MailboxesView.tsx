@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { auth } from "../lib/api";
 import type { Mailbox } from "../lib/api";
 import { useDomains, useMailboxes, useMailcowMutation } from "../lib/queries";
 import { ago, bytes, isActive, pct } from "../lib/format";
@@ -21,6 +23,8 @@ export function MailboxesView({ domain, showDomainFilter = true }: { domain?: st
   const [editing, setEditing] = useState<Mailbox | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [deleting, setDeleting] = useState<string[] | null>(null);
+  const me = useQuery({ queryKey: ["me"], queryFn: auth.me, staleTime: Infinity });
+  const mailcowUrl = me.data?.mailcowUrl?.replace(/\/$/, "");
 
   const del = useMailcowMutation((items: string[]) => ({ path: "delete/mailbox", body: items }), {
     invalidate: [["mailboxes"], ["domains"]],
@@ -161,6 +165,18 @@ export function MailboxesView({ domain, showDomainFilter = true }: { domain?: st
                     <StatusBadge active={isActive(m.active)} />
                   </td>
                   <td className="col-actions">
+                    {mailcowUrl && isActive(m.active) && (
+                      <a
+                        className="icon-btn"
+                        href={`${mailcowUrl}/sogo-auth.php?login=${encodeURIComponent(m.username)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Open SOGo as ${m.username}`}
+                        title="Open SOGo as this mailbox (needs you signed in to mailcow's admin in this browser)"
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
                     <button
                       className="icon-btn"
                       aria-label={`Edit ${m.username}`}
