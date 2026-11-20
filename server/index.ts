@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Agent, fetch as undiciFetch } from "undici";
 import { config } from "./config.js";
 import { isNewer, latestRelease } from "./updates.js";
+import { HostSampler } from "./hoststats.js";
 import { LoginLimiter, parseCookies, readSession, safeEqual, signSession, verifyPassword } from "./auth.js";
 
 const COOKIE = "mcui_session";
@@ -91,6 +92,12 @@ app.get("/api/auth/me", (req, res) => {
   const user = currentUser(req);
   if (!user) return res.status(401).json({ error: "Not signed in" });
   res.json({ user, mailcowUrl: config.mailcowUrl });
+});
+
+// CPU and memory history for the charts (sampled server-side, last hour).
+const hostSampler = new HostSampler(config.mailcowUrl, config.apiKey, dispatcher);
+app.get("/api/host-stats", requireAuth, async (_req, res) => {
+  res.json(await hostSampler.read());
 });
 
 // Is a newer mailcow release out? Compares the running version with GitHub's latest release.

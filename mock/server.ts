@@ -228,6 +228,19 @@ app.get("/api/v1/get/dkim/:domain", (req, res) => res.json(dkim[req.params.domai
 app.get("/api/v1/get/mailq/all", (_req, res) => res.json(mailq));
 app.get("/api/v1/get/quarantine/all", (_req, res) => res.json(quarantine));
 app.get("/api/v1/get/status/containers", (_req, res) => res.json(containers));
+let cpuWalk = 18;
+let memWalk = 46;
+app.get("/api/v1/get/status/host", (_req, res) => {
+  cpuWalk = Math.max(3, Math.min(95, cpuWalk + (Math.random() - 0.5) * 14 + (Math.random() < 0.08 ? 30 : 0) - (cpuWalk > 40 ? 6 : 0)));
+  memWalk = Math.max(30, Math.min(85, memWalk + (Math.random() - 0.5) * 2));
+  res.json({
+    cpu: { cores: 4, usage: Number(cpuWalk.toFixed(1)) },
+    memory: { total: 8 * GiB, usage: Number(memWalk.toFixed(1)), swap: { total: 2 * GiB, used: 0.1 * GiB } },
+    uptime: 6 * 86400 + 3600 * 5,
+    system_time: new Date().toISOString(),
+    architecture: "x86_64",
+  });
+});
 app.get("/api/v1/get/status/version", (_req, res) => res.json({ version: "2025-10a" }));
 app.get("/api/v1/get/status/vmail", (_req, res) =>
   res.json({ type: "info", disk: "/dev/sda1", used: "41G", total: "120G", used_percent: "34%" }),

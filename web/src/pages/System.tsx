@@ -1,6 +1,7 @@
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { useContainers, useUpdates, useVersion, useVmail } from "../lib/queries";
 import { UPDATE_DOCS_URL } from "../components/UpdateBanner";
+import { HostCharts } from "../components/HostCharts";
 import { ago } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, PageHeader, Stat, UsageBar } from "../components/ui";
 
@@ -37,6 +38,7 @@ export function SystemPage() {
           sub={vmail.data && <UsageBar value={parseInt(vmail.data.used_percent) || 0} label={`${vmail.data.used_percent} used on ${vmail.data.disk}`} />}
         />
       </div>
+      <HostCharts />
       <Card title="Services" pad={false}>
         {containers.isLoading ? (
           <Loading />

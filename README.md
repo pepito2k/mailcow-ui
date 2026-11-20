@@ -2,7 +2,7 @@
 
 A cleaner admin UI for a self-hosted [mailcow](https://mailcow.email) server. It talks to mailcow's REST API (`/api/v1`) and doesn't change mailcow itself, so you can run it next to the built-in UI and remove it any time.
 
-**Screens:** dashboard (with an alert when a newer mailcow release is out), domains (with per-domain mailboxes, aliases, DKIM, DNS records and rate limits), mailboxes (search, filters, bulk actions, rate limits), aliases, alias domains, resources, mail queue, quarantine, sync jobs, transports, relay hosts, TLS policies, BCC maps, recipient maps, forwarding hosts, domain admins, app passwords, Fail2ban, logs and service status. Light and dark themes, works on a phone.
+**Screens:** dashboard (CPU and memory charts for the last hour, and an alert when a newer mailcow release is out), domains (with per-domain mailboxes, aliases, DKIM, DNS records and rate limits), mailboxes (search, filters, bulk actions, rate limits), aliases, alias domains, resources, mail queue, quarantine, sync jobs, transports, relay hosts, TLS policies, BCC maps, recipient maps, forwarding hosts, domain admins, app passwords, Fail2ban, logs and service status. Light and dark themes, works on a phone.
 
 ## How it works
 

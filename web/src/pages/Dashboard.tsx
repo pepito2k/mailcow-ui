@@ -4,6 +4,7 @@ import { useAliases, useContainers, useDomains, useMailboxes, useQuarantine, use
 import { bytes, isActive, pct, plural } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, PageHeader, Stat, UsageBar } from "../components/ui";
 import { UpdateBanner } from "../components/UpdateBanner";
+import { HostCharts } from "../components/HostCharts";
 
 export function DashboardPage() {
   const domains = useDomains();
@@ -47,6 +48,8 @@ export function DashboardPage() {
           <Stat label="Quarantined" icon={<ShieldAlert size={18} />} value={quarantine.data?.length ?? "–"} />
         </Link>
       </div>
+
+      <HostCharts />
 
       <div className="grid-2">
         <Card title="Fullest mailboxes" actions={<Link to="/mailboxes" className="link">All mailboxes</Link>}>
