@@ -7,7 +7,14 @@
     "skipLibCheck": true,
     "outDir": "dist/server",
     "rootDir": "server",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["server"]
+  "include": [
+    "server"
+  ],
+  "exclude": [
+    "server/**/*.test.ts"
+  ]
 }

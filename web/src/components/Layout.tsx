@@ -26,6 +26,8 @@ import {
   Replace,
   ArrowRightLeft,
   Ban,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 import { useQueue, useQuarantine } from "../lib/queries";
 import { useTheme } from "../lib/theme";
@@ -34,12 +36,14 @@ const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/domains", label: "Domains", icon: Globe },
   { to: "/mailboxes", label: "Mailboxes", icon: Inbox },
+  { to: "/shared-mailboxes", label: "Shared mailboxes", icon: Users },
   { to: "/aliases", label: "Aliases", icon: Forward },
   { to: "/alias-domains", label: "Alias domains", icon: Globe2 },
   { to: "/resources", label: "Resources", icon: CalendarDays },
   { section: "Mail flow" },
   { to: "/queue", label: "Queue", icon: Send, count: "queue" },
   { to: "/quarantine", label: "Quarantine", icon: ShieldAlert, count: "quarantine" },
+  { to: "/spam-filter", label: "Spam filter", icon: ShieldCheck },
   { to: "/sync-jobs", label: "Sync jobs", icon: RefreshCcw },
   { section: "Routing" },
   { to: "/transports", label: "Transports", icon: RouteIcon },

@@ -6,6 +6,8 @@ import { Agent, fetch as undiciFetch } from "undici";
 import { config } from "./config.js";
 import { isNewer, latestRelease } from "./updates.js";
 import { HostSampler } from "./hoststats.js";
+import { checkDomain, systemLookup, type Check } from "./dnscheck.js";
+import { mailStats } from "./mailstats.js";
 import { LoginLimiter, parseCookies, readSession, safeEqual, signSession, verifyPassword } from "./auth.js";
 
 const COOKIE = "mcui_session";
@@ -124,6 +126,49 @@ app.get("/api/updates", requireAuth, async (_req, res) => {
     updateAvailable: !!(release && current && isNewer(release.version, current)),
     error: error ?? null,
   });
+});
+
+/** GET a mailcow API path with the server's key (for server-side features). */
+async function mcFetch<T>(sub: string, timeoutMs = 15_000): Promise<T> {
+  const r = await undiciFetch(`${config.mailcowUrl}/api/v1/${sub}`, {
+    headers: { "X-API-Key": config.apiKey, Accept: "application/json" },
+    dispatcher,
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!r.ok) throw new Error(`mailcow answered ${r.status} for ${sub.split("/").slice(0, 2).join("/")}`);
+  return (await r.json()) as T;
+}
+
+// DNS health for one domain: MX, SPF, DKIM and DMARC compared with what mailcow expects.
+const dns = systemLookup(process.env.DNS_SERVERS?.split(/[\s,]+/).filter(Boolean));
+const dnsCache = new Map<string, { at: number; body: unknown }>();
+const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+app.get("/api/dns-check/:domain", requireAuth, async (req, res) => {
+  const domain = String(req.params.domain).toLowerCase();
+  if (!DOMAIN_RE.test(domain)) return res.status(400).json({ error: "Not a domain name" });
+  const cached = dnsCache.get(domain);
+  if (cached && Date.now() - cached.at < 2 * 60_000 && req.query.fresh !== "1") return res.json(cached.body);
+  const mailHost = new URL(config.mailcowUrl).hostname;
+  try {
+    const d = await mcFetch<{ pubkey?: string; dkim_txt?: string; dkim_selector?: string }>(`get/dkim/${encodeURIComponent(domain)}`).catch(() => ({}) as Record<string, never>);
+    const dkim = d && d.dkim_txt ? { selector: d.dkim_selector || "dkim", txt: d.dkim_txt } : null;
+    const checks: Check[] = await checkDomain(domain, mailHost, dkim, dns);
+    const body = { domain, mailHost, checkedAt: new Date().toISOString(), checks };
+    dnsCache.set(domain, { at: Date.now(), body });
+    if (dnsCache.size > 500) dnsCache.delete(dnsCache.keys().next().value!);
+    res.json(body);
+  } catch (err) {
+    res.status(502).json({ error: `DNS lookup failed: ${err instanceof Error ? err.message : String(err)}` });
+  }
+});
+
+// Sent / received / spam / rejected per hour, built from rspamd's history.
+app.get("/api/mail-stats", requireAuth, async (_req, res) => {
+  try {
+    res.json(await mailStats((n) => mcFetch<unknown>(`get/logs/rspamd-history/${n}`, 30_000)));
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : String(err) });
+  }
 });
 
 // Proxy: /api/mailcow/<path> -> MAILCOW_URL/api/v1/<path>, adding the API key server-side.

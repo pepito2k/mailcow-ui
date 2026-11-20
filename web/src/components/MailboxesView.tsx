@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import type { Mailbox } from "../lib/api";
 import { useDomains, useMailboxes, useMailcowMutation } from "../lib/queries";
@@ -11,7 +12,8 @@ type Sort = "address" | "usage" | "login";
 export function MailboxesView({ domain, showDomainFilter = true }: { domain?: string; showDomainFilter?: boolean }) {
   const mailboxes = useMailboxes();
   const domains = useDomains();
-  const [q, setQ] = useState("");
+  const [params] = useSearchParams();
+  const [q, setQ] = useState(() => params.get("q") ?? "");
   const [domainFilter, setDomainFilter] = useState(domain ?? "");
   const [status, setStatus] = useState<"" | "active" | "disabled">("");
   const [sort, setSort] = useState<Sort>("address");

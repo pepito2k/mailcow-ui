@@ -11,7 +11,8 @@
     "build": "vite build && tsc -p tsconfig.server.json",
     "start": "node dist/server/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
-    "hash-password": "tsx server/hash-password.ts"
+    "hash-password": "tsx server/hash-password.ts",
+    "test": "tsx server/dnscheck.test.ts"
   },
   "license": "MIT",
   "dependencies": {

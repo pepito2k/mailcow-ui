@@ -1268,8 +1268,293 @@ textarea.input {
   place-items: center;
   pointer-events: none;
 }
+
+/* ---------- storage alerts ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.tone-warn { color: var(--warn); }
+.tone-bad { color: var(--bad); }
+.tone-good { color: var(--good); }
+.space-alerts {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+}
+.space-alerts-bad {
+  background: var(--bad-soft);
+  border-color: color-mix(in srgb, var(--bad) 35%, transparent);
+}
+.space-alerts-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.space-alerts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.space-alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+.space-alert:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.space-alert svg { flex-shrink: 0; margin-top: 2px; }
+.space-alert-title { display: block; }
+.space-alert-detail { display: block; }
+
+/* ---------- spam filter ---------- */
+.inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.inline-field > span {
+  white-space: nowrap;
+}
+.inline-field .input {
+  min-width: 260px;
+}
+.inline-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.inline-add .input {
+  flex: 1;
+  min-width: 0;
+}
+.levels-explain {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.5;
+}
+.toolbar-pad {
+  padding: 12px 16px 0;
+}
+
+/* ---------- DNS health ---------- */
+.row-gap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dns-checks {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.dns-check {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dns-check:last-child {
+  border-bottom: 0;
+}
+.dns-check-icon {
+  padding-top: 1px;
+}
+.dns-check-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.dns-check-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.dns-found {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.dns-value {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 12px;
+  background: var(--surface-2, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.tab-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.tab-dot-warn { background: var(--warn); }
+.tab-dot-fail { background: var(--bad); }
+
+/* ---------- mail traffic chart (categorical slots 1-4) ---------- */
+.card {
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --s4: #eda100;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .card {
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+  }
+}
+:root[data-theme="dark"] .card {
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #199e70;
+  --s4: #c98500;
+}
+.mstats-bar.s1, .mstats-swatch.s1 { fill: var(--s1); background: var(--s1); }
+.mstats-bar.s2, .mstats-swatch.s2 { fill: var(--s2); background: var(--s2); }
+.mstats-bar.s3, .mstats-swatch.s3 { fill: var(--s3); background: var(--s3); }
+.mstats-bar.s4, .mstats-swatch.s4 { fill: var(--s4); background: var(--s4); }
+.mstats-legend {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+}
+.mstats-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mstats-total {
+  font-variant-numeric: tabular-nums;
+}
+.mstats-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.mstats-hover {
+  fill: var(--text-3);
+  opacity: 0.08;
+}
+.chart-baseline {
+  stroke: var(--text-3);
+  stroke-width: 1;
+}
+.mstats-tip {
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+}
+.mstats-tip-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.mstats-tip-row strong {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.mstats-note {
+  margin: 8px 0 0;
+}
+
+/* ---------- shared mailboxes ---------- */
+.steps-intro {
+  margin: -8px 0 16px;
+  max-width: 760px;
+  line-height: 1.5;
+}
+.grid-top {
+  align-items: start;
+}
+.form-grid.one-col {
+  grid-template-columns: 1fr;
+}
+.chips-gap {
+  margin: 4px 0 8px;
+}
+.chip-x {
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0 0 0 2px;
+  cursor: pointer;
+  display: inline-flex;
+}
+.steps {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  line-height: 1.45;
+}
+.details summary {
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.details {
+  margin-bottom: 12px;
+}
+.code-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.inline-icon {
+  vertical-align: -2px;
+}
+
+/* DNS records table: stack rows on phones so long values stay readable */
 @media (max-width: 640px) {
-  .chart-axis {
-    font-size: 17px;
+  .table-dns thead {
+    display: none;
+  }
+  .table-dns tr {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 4px 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-dns td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .table-dns td:nth-child(3) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    overflow-wrap: anywhere;
   }
 }

@@ -6,6 +6,7 @@ import { useDomains, useMailcowMutation } from "../lib/queries";
 import { bytes, isActive, pct } from "../lib/format";
 import { Button, Card, ConfirmDialog, Empty, ErrorState, Loading, PageHeader, SearchInput, StatusBadge, UsageBar } from "../components/ui";
 import { DomainForm } from "../components/DomainForm";
+import { DnsBadge } from "../components/DnsHealth";
 
 export function DomainsPage() {
   const domains = useDomains();
@@ -60,6 +61,7 @@ export function DomainsPage() {
                   <th>Mailboxes</th>
                   <th>Aliases</th>
                   <th>Storage used</th>
+                  <th>DNS</th>
                   <th>Status</th>
                   <th className="col-actions" aria-label="Actions" />
                 </tr>
@@ -81,6 +83,9 @@ export function DomainsPage() {
                     </td>
                     <td className="col-usage">
                       <UsageBar value={pct(d.bytes_total, d.max_quota_for_domain)} label={`${bytes(d.bytes_total)} of ${bytes(d.max_quota_for_domain)}`} />
+                    </td>
+                    <td>
+                      <DnsBadge domain={d.domain_name} />
                     </td>
                     <td>
                       <StatusBadge active={isActive(d.active)} />

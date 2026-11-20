@@ -151,4 +151,35 @@ export function registerExtra(app: Express) {
     Object.assign(f2b, attr);
     res.json(ok("f2b_modified"));
   });
+
+  // Spam filter: allow/block lists and spam levels
+  const policies: Row[] = [
+    { prefid: 1, kind: "domain", object: "example.com", list: "wl", value: "*@partner.test" },
+    { prefid: 2, kind: "domain", object: "example.com", list: "bl", value: "*@spammy.test" },
+    { prefid: 3, kind: "mailbox", object: "gonzalo@family.net", list: "bl", value: "promo@shop.test" },
+  ];
+  for (const kind of ["domain", "mailbox"]) {
+    for (const list of ["wl", "bl"])
+      app.get(`/api/v1/get/policy_${list}_${kind}/:id`, (req, res) =>
+        res.json(policies.filter((p) => p.kind === kind && p.list === list && p.object === req.params.id).map(({ prefid, object, value }) => ({ prefid, object, value }))),
+      );
+    app.post(`/api/v1/add/${kind}-policy`, (req, res) => {
+      const b = req.body as Row;
+      const object = String(kind === "domain" ? b.domain : b.username);
+      if (policies.some((p) => p.kind === kind && p.object === object && p.value === b.object_from)) return res.json(fail("policy_list_from_exists"));
+      policies.push({ prefid: seq++, kind, object, list: b.object_list, value: b.object_from });
+      res.json(ok([`${kind}_modified`, object]));
+    });
+    app.post(`/api/v1/delete/${kind}-policy`, (req, res) => {
+      const ids = (req.body as unknown[]).map(String);
+      for (let i = policies.length - 1; i >= 0; i--) if (ids.includes(String(policies[i].prefid))) policies.splice(i, 1);
+      res.json(ok(["item_deleted", ids.join(", ")]));
+    });
+  }
+  const scores: Record<string, string> = { "gonzalo@family.net": "6,12" };
+  app.get("/api/v1/get/spam-score{/:mailbox}", (req, res) => res.json({ score: scores[req.params.mailbox ?? ""] ?? "8,15" }));
+  app.post("/api/v1/edit/spam-score", (req, res) => {
+    for (const m of req.body.items) scores[m] = String(req.body.attr.spam_score).replace(/\s+/g, "");
+    res.json(ok(["mailbox_modified", req.body.items.join(", ")]));
+  });
 }

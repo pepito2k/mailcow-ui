@@ -5,6 +5,8 @@ import { bytes, isActive, pct, plural } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, PageHeader, Stat, UsageBar } from "../components/ui";
 import { UpdateBanner } from "../components/UpdateBanner";
 import { HostCharts } from "../components/HostCharts";
+import { SpaceAlerts } from "../components/SpaceAlerts";
+import { MailStats } from "../components/MailStats";
 
 export function DashboardPage() {
   const domains = useDomains();
@@ -27,6 +29,7 @@ export function DashboardPage() {
       <PageHeader title="Dashboard" subtitle={version.data?.version ? `mailcow ${version.data.version}` : "Overview of your mail server"} />
 
       <UpdateBanner />
+      <SpaceAlerts />
 
       {domains.error && <ErrorState error={domains.error} retry={() => domains.refetch()} />}
 
@@ -48,6 +51,8 @@ export function DashboardPage() {
           <Stat label="Quarantined" icon={<ShieldAlert size={18} />} value={quarantine.data?.length ?? "–"} />
         </Link>
       </div>
+
+      <MailStats />
 
       <HostCharts />
 

@@ -7,6 +7,7 @@ import { Badge, Button, Card, ConfirmDialog, CopyButton, Empty, ErrorState, Fiel
 import { MailboxesView } from "../components/MailboxesView";
 import { AliasesView } from "../components/AliasesView";
 import { DomainForm } from "../components/DomainForm";
+import { DnsHealth, useDnsCheck, worst } from "../components/DnsHealth";
 
 type Tab = "mailboxes" | "aliases" | "dns";
 
@@ -59,7 +60,7 @@ export function DomainDetailPage({ mailcowUrl }: { mailcowUrl: string }) {
       <div className="tabs" role="tablist">
         {(["mailboxes", "aliases", "dns"] as Tab[]).map((t) => (
           <button key={t} role="tab" aria-selected={tab === t} className={`tab ${tab === t ? "tab-active" : ""}`} onClick={() => setTab(t)}>
-            {t === "dns" ? "DNS & DKIM" : t[0].toUpperCase() + t.slice(1)}
+            {t === "dns" ? <DnsTabLabel domain={d.domain_name} /> : t[0].toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>
@@ -107,6 +108,7 @@ function DnsPanel({ domain, mailHost }: { domain: string; mailHost: string }) {
 
   return (
     <>
+      <DnsHealth domain={domain} />
       <Card
         title="DKIM signing key"
         actions={
@@ -215,6 +217,16 @@ function DnsPanel({ domain, mailHost }: { domain: string; mailHost: string }) {
         onClose={() => setDelOpen(false)}
         onConfirm={() => del.mutate(undefined, { onSuccess: () => setDelOpen(false) })}
       />
+    </>
+  );
+}
+
+function DnsTabLabel({ domain }: { domain: string }) {
+  const w = worst(useDnsCheck(domain).data?.checks);
+  return (
+    <>
+      DNS & DKIM
+      {w && w !== "ok" && <span className={`tab-dot tab-dot-${w}`} aria-label={w === "fail" ? "DNS problems" : "DNS warnings"} />}
     </>
   );
 }

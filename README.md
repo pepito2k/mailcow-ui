@@ -2,7 +2,7 @@
 
 A cleaner admin UI for a self-hosted [mailcow](https://mailcow.email) server. It talks to mailcow's REST API (`/api/v1`) and doesn't change mailcow itself, so you can run it next to the built-in UI and remove it any time.
 
-**Screens:** dashboard (CPU and memory charts for the last hour, and an alert when a newer mailcow release is out), domains (with per-domain mailboxes, aliases, DKIM, DNS records and rate limits), mailboxes (search, filters, bulk actions, rate limits), aliases, alias domains, resources, mail queue, quarantine, sync jobs, transports, relay hosts, TLS policies, BCC maps, recipient maps, forwarding hosts, domain admins, app passwords, Fail2ban, logs and service status. Light and dark themes, works on a phone.
+**Screens:** dashboard (mail traffic chart, CPU and memory charts, warnings when a mailbox, domain or the disk is nearly full, and an alert when a newer mailcow release is out), domains (with per-domain mailboxes, aliases, DKIM, a DNS health check for MX/SPF/DKIM/DMARC, recommended DNS records and rate limits), mailboxes (search, filters, bulk actions, rate limits), shared mailboxes (send-as permissions), spam filter (allow and block lists per domain or mailbox, per-mailbox spam levels), aliases, alias domains, resources, mail queue, quarantine, sync jobs, transports, relay hosts, TLS policies, BCC maps, recipient maps, forwarding hosts, domain admins, app passwords, Fail2ban, logs and service status. Light and dark themes, works on a phone.
 
 ## How it works
 
@@ -55,6 +55,7 @@ If you put it on the same machine as mailcow, use `MAILCOW_URL=https://<your mai
 | `npm run build` | Builds the frontend and server into `dist/` |
 | `npm start` | Runs the built app (`dist/server/index.js`) |
 | `npm run typecheck` | TypeScript checks for frontend and server |
+| `npm test` | Checks for the DNS health rules and mail stats |
 | `npm run hash-password` | Prints an `ADMIN_PASSWORD_HASH` line |
 
 ## Project layout
@@ -65,6 +66,12 @@ web/      React + TypeScript frontend (Vite, TanStack Query, React Router)
 mock/     Fake mailcow API for development
 ```
 
+## Notes on a few features
+
+- **DNS health** runs lookups from this app's server, against the hostname in `MAILCOW_URL`. Results are cached for 2 minutes ("Check again" skips the cache). Set `DNS_SERVERS=1.1.1.1,8.8.8.8` if the server's own resolver gives different answers than the internet does.
+- **Mail traffic** comes from rspamd's scan history (the last 5,000 messages), so on a busy server it covers less than a day. Messages from a signed-in user count as sent; everything else is received, spam (delivered but marked) or rejected.
+- **Shared mailboxes**: mailcow's API can set who may send as a mailbox, but it can't read the current list or share folders. Saving replaces the send-as list, and folder access is granted in SOGo (Sharing) or with `doveadm acl`. The page explains both.
+
 ## Still only in mailcow's own UI
 
-rspamd settings and spam filter maps, OAuth2 clients, per-mailbox spam score and allow/block lists, quota notifications, and the mailcow system configuration pages. Screens that use API calls I couldn't verify against a real server: quarantine release, emptying the whole queue, Fail2ban unban and resource booking options.
+Global rspamd settings and filter maps, OAuth2 clients, quota notification emails, IMAP folder sharing, and the mailcow system configuration pages. Screens that use API calls I couldn't verify against a real server: quarantine release, emptying the whole queue, Fail2ban unban, resource booking options, spam allow/block lists, spam levels and send-as permissions.

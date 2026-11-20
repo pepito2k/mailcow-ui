@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Cpu, MemoryStick } from "lucide-react";
 import { bytes } from "../lib/format";
 import { Card, ErrorState, Loading } from "./ui";
+import { useWidth } from "../lib/useWidth";
 
 interface Sample {
   t: number;
@@ -100,12 +101,12 @@ function ChartCard({
   );
 }
 
-const W = 600;
 const H = 150;
 const PAD = { l: 34, r: 8, t: 8, b: 20 };
 
 function LineChart({ samples, pick, label }: { samples: Sample[]; pick: (s: Sample) => number | null; label: string }) {
   const ref = useRef<SVGSVGElement>(null);
+  const [wrap, W] = useWidth<HTMLDivElement>(600);
   const [hover, setHover] = useState<number | null>(null);
   const now = samples.length ? samples[samples.length - 1].t : Date.now();
   const t0 = now - WINDOW_MS;
@@ -132,7 +133,7 @@ function LineChart({ samples, pick, label }: { samples: Sample[]; pick: (s: Samp
       return { line, area, single: seg.length === 1 ? seg[0] : null };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pts, t0]);
+  }, [pts, t0, W]);
 
   const onMove = (e: React.PointerEvent) => {
     const svg = ref.current;
@@ -149,10 +150,11 @@ function LineChart({ samples, pick, label }: { samples: Sample[]; pick: (s: Samp
   const timeTicks = [60, 45, 30, 15, 0];
 
   return (
-    <div className="chart-wrap">
+    <div className="chart-wrap" ref={wrap}>
       <svg
         ref={ref}
         viewBox={`0 0 ${W} ${H}`}
+        height={H}
         className="chart"
         role="img"
         aria-label={`${label} usage over the last hour`}

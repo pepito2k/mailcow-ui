@@ -145,7 +145,7 @@ const containers = [
 function logs(type: string, count: number): Row[] {
   const out: Row[] = [];
   for (let i = 0; i < count; i++) {
-    const t = now() - i * 47;
+    const t = now() - i * (type === "rspamd-history" ? 16 : 47);
     if (type === "api") out.push({ time: t, uri: "/api/v1/get/mailbox/all", method: "GET", remote: "172.22.1.1", data: "" });
     else if (type === "rspamd-history")
       out.push({
@@ -154,8 +154,15 @@ function logs(type: string, count: number): Row[] {
         sender_smtp: "news@shop.test",
         rcpt_smtp: ["bob@example.com"],
         subject: ["Weekly deals", "Your order shipped", "Password reset"][i % 3],
-        action: i % 7 === 0 ? "add header" : "no action",
-        score: i % 7 === 0 ? 7.3 : 0.4,
+        // Busier during the day, with some spam, rejects, greylisting and outbound mail.
+        ...(() => {
+          const hour = new Date(t * 1000).getHours();
+          const r = (i * 7919) % 100;
+          const day = hour >= 8 && hour <= 20;
+          const action = r < (day ? 4 : 10) ? "reject" : r < (day ? 9 : 18) ? "add header" : r < (day ? 11 : 20) ? "greylist" : "no action";
+          const user = action === "no action" && r % 3 === 0 && day ? ["alice@example.com", "gonzalo@family.net", "bob@example.com"][r % 3 === 0 ? (i % 3) : 0] : "";
+          return { action, user, score: action === "reject" ? 18.2 : action === "add header" ? 7.3 : 0.4 };
+        })(),
         required_score: 15,
         ip: "198.51.100.23",
         size: 23456,
@@ -245,7 +252,7 @@ app.get("/api/v1/get/status/version", (_req, res) => res.json({ version: "2025-1
 app.get("/api/v1/get/status/vmail", (_req, res) =>
   res.json({ type: "info", disk: "/dev/sda1", used: "41G", total: "120G", used_percent: "34%" }),
 );
-app.get("/api/v1/get/logs/:type/:count", (req, res) => res.json(logs(req.params.type, Math.min(Number(req.params.count) || 50, 500))));
+app.get("/api/v1/get/logs/:type/:count", (req, res) => res.json(logs(req.params.type, Math.min(Number(req.params.count) || 50, req.params.type === "rspamd-history" ? 5000 : 500))));
 
 // ---- ADD ----
 app.post("/api/v1/add/domain", (req, res) => {
@@ -315,6 +322,7 @@ app.post("/api/v1/edit/mailbox", (req, res) => {
       r.percent_in_use = Math.round((Number(r.quota_used) / Number(r.quota)) * 100);
     }
     if (a.force_pw_update !== undefined) (r.attributes as Row).force_pw_update = String(a.force_pw_update);
+    if (a.sender_acl !== undefined) r.sender_acl_saved = a.sender_acl;
   });
   res.json(ok(["mailbox_modified", items.join(", ")]));
 });
