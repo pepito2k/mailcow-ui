@@ -188,6 +188,11 @@ const fail = (msg: unknown) => [{ type: "danger", log: [], msg }];
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
+
+// Fake GitHub "latest release" for the update check (npm run demo points UPDATE_CHECK_URL here).
+app.get("/github/releases/latest", (_req, res) =>
+  res.json({ tag_name: "2025-11", name: "2025-11 (Nov 2025)", html_url: "https://github.com/mailcow/mailcow-dockerized/releases/tag/2025-11", published_at: "2025-11-12T10:00:00Z" }),
+);
 app.use((req, res, next) => {
   if (req.get("X-API-Key") !== "mock-key") return res.status(401).json({ type: "error", msg: "authentication failed" });
   // A little latency so loading states are visible

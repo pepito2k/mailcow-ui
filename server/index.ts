@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Agent, fetch as undiciFetch } from "undici";
 import { config } from "./config.js";
+import { isNewer, latestRelease } from "./updates.js";
 import { LoginLimiter, parseCookies, readSession, safeEqual, signSession, verifyPassword } from "./auth.js";
 
 const COOKIE = "mcui_session";
@@ -90,6 +91,32 @@ app.get("/api/auth/me", (req, res) => {
   const user = currentUser(req);
   if (!user) return res.status(401).json({ error: "Not signed in" });
   res.json({ user, mailcowUrl: config.mailcowUrl });
+});
+
+// Is a newer mailcow release out? Compares the running version with GitHub's latest release.
+app.get("/api/updates", requireAuth, async (_req, res) => {
+  let current: string | null = null;
+  try {
+    const r = await undiciFetch(`${config.mailcowUrl}/api/v1/get/status/version`, {
+      headers: { "X-API-Key": config.apiKey, Accept: "application/json" },
+      dispatcher,
+      signal: AbortSignal.timeout(10_000),
+    });
+    current = ((await r.json()) as { version?: string }).version ?? null;
+  } catch {
+    current = null;
+  }
+  const { enabled, release, error } = await latestRelease();
+  res.json({
+    enabled,
+    current,
+    latest: release?.version ?? null,
+    releaseName: release?.name ?? null,
+    releaseUrl: release?.url ?? null,
+    publishedAt: release?.publishedAt ?? null,
+    updateAvailable: !!(release && current && isNewer(release.version, current)),
+    error: error ?? null,
+  });
 });
 
 // Proxy: /api/mailcow/<path> -> MAILCOW_URL/api/v1/<path>, adding the API key server-side.

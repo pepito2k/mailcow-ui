@@ -84,3 +84,27 @@ export function useMailcowMutation<V>(
     onError: (err) => toast.error(err instanceof Error ? err.message : String(err)),
   });
 }
+
+export interface UpdateInfo {
+  enabled: boolean;
+  current: string | null;
+  latest: string | null;
+  releaseName: string | null;
+  releaseUrl: string | null;
+  publishedAt: string | null;
+  updateAvailable: boolean;
+  error: string | null;
+}
+
+/** Newer mailcow release check (server caches GitHub for 6 hours). */
+export const useUpdates = () =>
+  useQuery({
+    queryKey: ["updates"],
+    queryFn: async () => {
+      const r = await fetch("/api/updates", { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!r.ok) throw new Error(`Update check failed (${r.status})`);
+      return (await r.json()) as UpdateInfo;
+    },
+    staleTime: 60 * 60_000,
+    retry: false,
+  });

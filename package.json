@@ -7,7 +7,7 @@
     "dev:server": "tsx watch --env-file-if-exists=.env server/index.ts",
     "dev:web": "vite",
     "mock": "tsx mock/server.ts",
-    "demo": "concurrently -k -n mock,server,web \"npm:mock\" \"MAILCOW_URL=http://localhost:8081 MAILCOW_API_KEY=mock-key ADMIN_USER=admin ADMIN_PASSWORD=admin SESSION_SECRET=demo-secret-demo-secret-demo-secret tsx watch server/index.ts\" \"npm:dev:web\"",
+    "demo": "concurrently -k -n mock,server,web \"npm:mock\" \"MAILCOW_URL=http://localhost:8081 UPDATE_CHECK_URL=http://localhost:8081/github/releases/latest MAILCOW_API_KEY=mock-key ADMIN_USER=admin ADMIN_PASSWORD=admin SESSION_SECRET=demo-secret-demo-secret-demo-secret tsx watch server/index.ts\" \"npm:dev:web\"",
     "build": "vite build && tsc -p tsconfig.server.json",
     "start": "node dist/server/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",

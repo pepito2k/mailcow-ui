@@ -3,6 +3,7 @@ import { Globe, Inbox, Forward, HardDrive, Send, ShieldAlert, CheckCircle2, Aler
 import { useAliases, useContainers, useDomains, useMailboxes, useQuarantine, useQueue, useVersion, useVmail } from "../lib/queries";
 import { bytes, isActive, pct, plural } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, PageHeader, Stat, UsageBar } from "../components/ui";
+import { UpdateBanner } from "../components/UpdateBanner";
 
 export function DashboardPage() {
   const domains = useDomains();
@@ -23,6 +24,8 @@ export function DashboardPage() {
   return (
     <>
       <PageHeader title="Dashboard" subtitle={version.data?.version ? `mailcow ${version.data.version}` : "Overview of your mail server"} />
+
+      <UpdateBanner />
 
       {domains.error && <ErrorState error={domains.error} retry={() => domains.refetch()} />}
 

@@ -1,5 +1,6 @@
 import { CheckCircle2, AlertTriangle } from "lucide-react";
-import { useContainers, useVersion, useVmail } from "../lib/queries";
+import { useContainers, useUpdates, useVersion, useVmail } from "../lib/queries";
+import { UPDATE_DOCS_URL } from "../components/UpdateBanner";
 import { ago } from "../lib/format";
 import { Badge, Card, ErrorState, Loading, PageHeader, Stat, UsageBar } from "../components/ui";
 
@@ -7,6 +8,20 @@ export function SystemPage() {
   const containers = useContainers();
   const version = useVersion();
   const vmail = useVmail();
+  const updates = useUpdates();
+  const u = updates.data;
+  const versionSub = !u?.enabled ? undefined : u.updateAvailable ? (
+    <span>
+      <Badge tone="warn">{u.latest} available</Badge>{" "}
+      <a className="link" href={UPDATE_DOCS_URL} target="_blank" rel="noreferrer">
+        How to update
+      </a>
+    </span>
+  ) : u.latest ? (
+    <span>Up to date (latest is {u.latest})</span>
+  ) : u.error ? (
+    <span>Couldn't check for updates</span>
+  ) : undefined;
   const list = containers.data ?? [];
   const bad = list.filter((c) => c.state !== "running");
 
@@ -14,7 +29,7 @@ export function SystemPage() {
     <>
       <PageHeader title="Status" subtitle="Health of the mailcow services." />
       <div className="stats stats-3">
-        <Stat label="mailcow version" value={version.data?.version ?? "–"} />
+        <Stat label="mailcow version" value={version.data?.version ?? "–"} sub={versionSub} />
         <Stat label="Services running" value={containers.data ? `${list.length - bad.length} / ${list.length}` : "–"} sub={bad.length ? <span className="danger-text">{bad.map((b) => b.container).join(", ")} not running</span> : undefined} />
         <Stat
           label="Mail storage disk"
