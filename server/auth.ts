@@ -5,11 +5,12 @@ const SCRYPT_PREFIX = "scrypt";
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const key = scryptSync(password, salt, 64);
-  return `${SCRYPT_PREFIX}$${salt.toString("base64")}$${key.toString("base64")}`;
+  // ":" separators, not "$": Docker Compose and Coolify treat "$" in env values as variables.
+  return `${SCRYPT_PREFIX}:${salt.toString("base64")}:${key.toString("base64")}`;
 }
 
 export function verifyPassword(password: string, stored: string): boolean {
-  const [prefix, saltB64, keyB64] = stored.split("$");
+  const [prefix, saltB64, keyB64] = stored.split(/[:$]/);
   if (prefix !== SCRYPT_PREFIX || !saltB64 || !keyB64) return false;
   const expected = Buffer.from(keyB64, "base64");
   const actual = scryptSync(password, Buffer.from(saltB64, "base64"), expected.length);

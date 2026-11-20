@@ -1113,3 +1113,7 @@ textarea.input {
 .login-card > p {
   margin: 4px 0 22px;
 }
+.setup-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}

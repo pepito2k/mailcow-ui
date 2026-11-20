@@ -32,6 +32,16 @@ Open http://localhost:5173 and sign in with `admin` / `admin`. This runs against
    - Locally: `npm run dev` and open http://localhost:5173 (set `COOKIE_SECURE=0` when testing over plain http).
    - With Docker (recommended for the server): `docker compose up -d --build`, then point your reverse proxy at `127.0.0.1:3000` with HTTPS.
 
+### Deploying with Coolify
+
+1. New resource from this GitHub repo, build pack **Dockerfile** (not Nixpacks, not Docker Compose). Ports exposes: `3000`.
+2. Give it **its own domain**, for example `https://mailadmin.example.com`. Don't reuse your mailcow hostname (the one in your MX record): that name must keep pointing at mailcow or mail, webmail and certificates break.
+3. Add these environment variables: `MAILCOW_URL` (your mailcow address, e.g. `https://mail.example.com`), `MAILCOW_API_KEY`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET` and `COOKIE_SECURE=1`.
+4. In mailcow's API settings, allow the public IP of the Coolify server for the API key.
+5. Deploy. The logs should end with `mailcow API OK`. If something is missing or wrong, the logs and the sign-in page list what to fix.
+
+If mailcow and Coolify run on the same machine, they both want ports 80 and 443. mailcow's docs cover running it behind another reverse proxy (`HTTP_PORT`/`HTTPS_PORT` in `mailcow.conf`).
+
 ### Running it on the mailcow host
 
 If you put it on the same machine as mailcow, use `MAILCOW_URL=https://<your mail hostname>` and add the server's public IP (or the Docker gateway IP) to the API key's allowed IPs. An easy reverse-proxy option is a separate subdomain such as `admin.example.com` in front of port 3000.

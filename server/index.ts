@@ -21,7 +21,18 @@ app.use((_req, res, next) => {
   next();
 });
 
-function setSessionCookie(res: Response, value: string, maxAgeSec: number) {
+// Liveness check for Docker/Coolify. Always 200 while the process is up.
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true, configured: config.problems.length === 0 });
+});
+
+// Until the required settings are present, every other API call explains what's missing.
+app.use("/api", (req, res, next) => {
+  if (!config.problems.length || req.path === "/health") return next();
+  res.status(503).json({ error: "This app isn't configured yet.", setup: config.problems });
+});
+
+function setSessionCookie(req: Request, res: Response, value: string, maxAgeSec: number) {
   const parts = [
     `${COOKIE}=${encodeURIComponent(value)}`,
     "Path=/",
@@ -29,7 +40,7 @@ function setSessionCookie(res: Response, value: string, maxAgeSec: number) {
     "SameSite=Strict",
     `Max-Age=${maxAgeSec}`,
   ];
-  if (config.cookieSecure) parts.push("Secure");
+  if (config.cookieSecure || req.secure) parts.push("Secure");
   res.setHeader("Set-Cookie", parts.join("; "));
 }
 
@@ -58,15 +69,20 @@ app.post("/api/auth/login", express.json({ limit: "10kb" }), (req, res) => {
     limiter.fail(ip);
     return res.status(401).json({ error: "Wrong username or password" });
   }
+  if (config.cookieSecure && !req.secure) {
+    return res.status(400).json({
+      error: "COOKIE_SECURE=1 but this request arrived over plain http, so the browser would drop the login cookie. Open the app over https, or set COOKIE_SECURE=0.",
+    });
+  }
   limiter.clear(ip);
   const maxAge = Math.round(config.sessionHours * 3600);
   const token = signSession({ user: config.adminUser, exp: Date.now() + maxAge * 1000 }, config.sessionSecret);
-  setSessionCookie(res, token, maxAge);
+  setSessionCookie(req, res, token, maxAge);
   res.json({ user: config.adminUser });
 });
 
-app.post("/api/auth/logout", (_req, res) => {
-  setSessionCookie(res, "", 0);
+app.post("/api/auth/logout", (req, res) => {
+  setSessionCookie(req, res, "", 0);
   res.json({ ok: true });
 });
 
@@ -117,6 +133,30 @@ if (existsSync(webDir)) {
   app.get(/.*/, (_req, res) => res.sendFile(path.join(webDir, "index.html")));
 }
 
-app.listen(config.port, () => {
-  console.log(`mailcow-ui listening on http://localhost:${config.port} -> ${config.mailcowUrl}`);
+app.listen(config.port, "0.0.0.0", () => {
+  console.log(`mailcow-ui listening on 0.0.0.0:${config.port}`);
+  if (config.problems.length) {
+    console.error("\nmailcow-ui is NOT configured yet. Fix these environment variables and restart:");
+    for (const p of config.problems) console.error(`  - ${p}`);
+    console.error("");
+  } else {
+    console.log(`Talking to mailcow at ${config.mailcowUrl}`);
+    checkMailcow();
+  }
 });
+
+/** One request at startup so connection or API-key problems show up in the logs right away. */
+async function checkMailcow() {
+  try {
+    const r = await undiciFetch(`${config.mailcowUrl}/api/v1/get/status/version`, {
+      headers: { "X-API-Key": config.apiKey, Accept: "application/json" },
+      dispatcher,
+      signal: AbortSignal.timeout(10_000),
+    });
+    const body = await r.text();
+    if (r.ok && !body.includes('"error"')) console.log(`mailcow API OK: ${body.slice(0, 120)}`);
+    else console.error(`mailcow API answered ${r.status}: ${body.slice(0, 200)}. Check MAILCOW_API_KEY and that this server's IP is allowed for the key.`);
+  } catch (err) {
+    console.error(`Can't reach mailcow at ${config.mailcowUrl}: ${err instanceof Error ? (err.cause ?? err.message) : err}`);
+  }
+}
